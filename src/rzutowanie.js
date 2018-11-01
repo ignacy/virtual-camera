@@ -2,14 +2,17 @@
 
 const canvas = document.getElementById("kanvas");
 const context = canvas.getContext("2d");
-const defaultColor = "#111111";
+const defaultColor = "#3D9970";
 const stepSize = 500;
 
 /**
  * Opisuje wektory przesunięcia
  */
 const MOVEMENT = {
-  up: [0, stepSize, 0]
+  up: [0, stepSize, 0],
+  down: [0, -stepSize, 0],
+  left: [0, 0, -stepSize],
+  right: [stepSize, 0, 0]
 }
 
 /**
@@ -42,6 +45,15 @@ class Surface {
     this.points = points;
   }
 
+  draw() {
+    context.beginPath();
+    context.moveTo(this.points[0].x, this.points[0].y);
+    this.points.slice(1).map((point) => context.lineTo(point.x, point.y));
+    context.closePath();
+    context.fillStyle = defaultColor;
+    context.fill();
+  }
+
   get asMatrix() {
     return this.points.map(p => p.asVector);
   }
@@ -58,11 +70,11 @@ class Block {
    */
   constructor(p1, p2) {
     this.p1 = p1;
-    this.p2 - p2;
+    this.p2 = p2;
   }
 
   get surfaces() {
-    [
+    return [
       new Surface(
         this.p1,
         new Point3d(
@@ -180,7 +192,7 @@ class Block {
   }
 
   get coordinatesMatrix() {
-    this.surfaces.map(s => s.asMatrix);
+    return this.surfaces.map(s => s.asMatrix);
   }
 }
 
@@ -214,6 +226,17 @@ class Matrixes {
     ]
   };
 
+
+  static identityMatrix() {
+    //prettier-ignore
+    return [
+      [1, 0, 0, 0],
+      [0, 1, 0, 0],
+      [0, 0, 1, 0],
+      [0, 0, 0, 1]
+    ]
+  };
+
   /**
    * Transponuje macierz [zamienia wiersze na kolumny i kolumny na wiersze]
    * @param {matrix} matrix - macierz do transponowania
@@ -228,7 +251,7 @@ class Matrixes {
   };
 
   static multipleMultiplication(...matrixes) {
-    return matrixes.reduce((previous, matrix) => this.multiplication(previous, matrix));
+    return matrixes.reduce((previous, matrix) => this.multiplication(previous, matrix), this.identityMatrix());
   }
 }
 
@@ -280,9 +303,6 @@ const darwHandledKey = text => {
   context.fillStyle = "#111111";
 };
 
-var cameraPosition = new Point3d(-100, 0, 0);
-
-const block = new Block(new Point3d(500, 0, 0), new Point3d(1000, 1000, 1000));
 
 class Scene {
   constructor(...objects) {
@@ -290,7 +310,7 @@ class Scene {
   }
 
   draw(camera) {
-
+    this.objects.map((object) => object.surfaces.map((surface) => surface.draw()));
   }
 }
 
@@ -328,9 +348,9 @@ class Camera {
 
   get combinationMatrix() {
     // TODO dodac alignAxes()
-    Matrixes.multipleMultiplication(
+    return Matrixes.multipleMultiplication(
       this.perspective,
-      Matrixes.leftToRightHanded,
+      Matrixes.leftToRightHanded(),
       this.translateCenter
     )
   }
@@ -354,6 +374,16 @@ const projectScene = (camera, scene) => {
   });
 }
 
+const MAIN = 'starthere';
+
+var cameraPosition = new Point3d(-100, 0, 0);
+
+var camera = new Camera(cameraPosition, {}, 1);
+const block = new Block(new Point3d(0, 0, 500), new Point3d(500, 100, 800));
+const scene = new Scene(block);
+
+scene.draw(projectScene(camera, scene));
+
 /**
  * Obsługuje wciśnięcie klawisza
  * @param {event.key} key - Wciśnięty klawisz 
@@ -367,6 +397,38 @@ const handleAction = key => {
       cameraPosition = new Point3d(translated[0][0], translated[1][0], translated[2][0]);
       console.log("After:");
       console.table(cameraPosition);
+      camera = new Camera(cameraPosition, {}, 1);
+      scene.draw(projectScene(camera, scene));
+
+      break;
+    case "s":
+      console.log("Before", cameraPosition);
+      var translated = translate(cameraPosition.asMatrix, MOVEMENT.down);
+      cameraPosition = new Point3d(translated[0][0], translated[1][0], translated[2][0]);
+      console.log("After:");
+      console.table(cameraPosition);
+      camera = new Camera(cameraPosition, {}, 1);
+      scene.draw(projectScene(camera, scene));
+      break;
+
+    case "a":
+      console.log("Before", cameraPosition);
+      var translated = translate(cameraPosition.asMatrix, MOVEMENT.left);
+      cameraPosition = new Point3d(translated[0][0], translated[1][0], translated[2][0]);
+      console.log("After:");
+      console.table(cameraPosition);
+      camera = new Camera(cameraPosition, {}, 1);
+      scene.draw(projectScene(camera, scene));
+      break;
+
+    case "d":
+      console.log("Before", cameraPosition);
+      var translated = translate(cameraPosition.asMatrix, MOVEMENT.right);
+      cameraPosition = new Point3d(translated[0][0], translated[1][0], translated[2][0]);
+      console.log("After:");
+      console.table(cameraPosition);
+      camera = new Camera(cameraPosition, {}, 1);
+      scene.draw(projectScene(camera, scene));
       break;
   }
 };
