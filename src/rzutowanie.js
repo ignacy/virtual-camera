@@ -12,7 +12,9 @@ const MOVEMENT = {
   closer: [stepSize, 0, 0],
   further: [-stepSize, 0, 0],  
   left: [0, 0, -stepSize],
-  right: [0, 0, stepSize]
+  right: [0, 0, stepSize],
+  up: [0, stepSize, 0],
+  down: [0, -stepSize, 0]
 }
 
 /**
@@ -320,7 +322,10 @@ class Scene {
     context.clearRect(-999, -999, 99999, 99999);
 
 
-    projection.map((object) => {
+    projection.map((objectAndColor) => {
+      const object = objectAndColor[0];
+      context.strokeStyle = objectAndColor[1];
+
       object.map((surface) => {
         context.beginPath();
         context.moveTo(surface[0].x, surface[0].y);
@@ -433,7 +438,7 @@ const projectScene = (camera, scene) => {
       });
       return forSurface;
     });
-    return forObject;
+    return [forObject, object.color];
   });
   return forScene;
 }
@@ -446,7 +451,8 @@ var targetPoint = new Point3d(500, 0, 0);
 var camera = new Camera(cameraPosition, targetPoint, 50);
 const block1 = new Block(new Point3d(500, 0, 0), new Point3d(1000, 1000, 1000), defaultColor);
 const block2 = new Block(new Point3d(0, 0, 2500), new Point3d(1000, 1000, 3500), "#85144b");
-const scene = new Scene(block1, block2);
+const block3 = new Block(new Point3d(1000, 0, 7000), new Point3d(1500, 1000, 8000), "#FFDC00");
+const scene = new Scene(block1, block2, block3);
 
 scene.draw(projectScene(camera, scene));
 
@@ -457,7 +463,7 @@ const transform = (key, movement) => {
   targetPoint = new Point3d(translatedTarget[0][0], translatedTarget[1][0], translatedTarget[2][0]);
   camera = new Camera(cameraPosition, targetPoint, 100);
   scene.draw(projectScene(camera, scene));
-  drwaHandledKey(key);
+  drawHandledKey(key);
 }
 
 /**
@@ -468,16 +474,22 @@ const handleAction = key => {
 
   switch (key) {
     case "w":
-      transform(key, MOVEMENT.closer);
+      transform("w", MOVEMENT.closer);
       break;
     case "s":
-      transform(key, MOVEMENT.further);
+      transform("s", MOVEMENT.further);
       break;
-    case "a":
-      transform(key, MOVEMENT.left);
+    case "ArrowDown":
+      transform("\\/", MOVEMENT.up);
       break;
-    case "d":
-      transform(key, MOVEMENT.right);
+    case "ArrowUp":
+      transform("^", MOVEMENT.down);
+      break;
+    case "ArrowLeft":
+      transform("->", MOVEMENT.left);
+      break;
+    case "ArrowRight":
+      transform("<-", MOVEMENT.right);
       break;
   }
 };
