@@ -9,10 +9,10 @@ const stepSize = 500;
  * Opisuje wektory przesunięcia
  */
 const MOVEMENT = {
-  up: [0, stepSize, 0],
-  down: [0, -stepSize, 0],
+  closer: [stepSize, 0, 0],
+  further: [-stepSize, 0, 0],  
   left: [0, 0, -stepSize],
-  right: [stepSize, 0, 0]
+  right: [0, 0, stepSize]
 }
 
 /**
@@ -50,8 +50,7 @@ class Surface {
     context.moveTo(this.points[0].x, this.points[0].y);
     this.points.slice(1).map((point) => context.lineTo(point.x, point.y));
     context.closePath();
-    context.fillStyle = defaultColor;
-    context.fill();
+    context.stroke();
   }
 
   get asMatrix() {
@@ -68,9 +67,10 @@ class Block {
    * @param {Point3d} p1 - first point 
    * @param {Point3d} p2 - second point
    */
-  constructor(p1, p2) {
+  constructor(p1, p2, color) {
     this.p1 = p1;
     this.p2 = p2;
+    this.color = color;
   }
 
   get surfaces() {
@@ -237,6 +237,12 @@ class Matrixes {
     ]
   };
 
+  static homogeneus(m) {
+    var mflat = m.flat();
+    var lst = mflat[mflat.length-1];
+    return mflat.map(x => x/lst);
+  }
+
   /**
    * Transponuje macierz [zamienia wiersze na kolumny i kolumny na wiersze]
    * @param {matrix} matrix - macierz do transponowania
@@ -292,7 +298,7 @@ const translate = (cameraPosition, translationVector) => {
  * Rysuje w narozniku obecnie obsługiwany znak wprowadzony z klawiatury
  * @param {String} text - znak na wciśniętym klawiszu
  */
-const darwHandledKey = text => {
+const drawHandledKey = text => {
   context.clearRect(750, 750, 50, 50);
   context.fillStyle = "#DDDDDD";
   context.fillRect(750, 750, 50, 50);
@@ -309,9 +315,37 @@ class Scene {
     this.objects = objects;
   }
 
-  draw(camera) {
-    this.objects.map((object) => object.surfaces.map((surface) => surface.draw()));
+  draw(projection) {
+    context.strokeStyle = defaultColor;
+    context.clearRect(-999, -999, 99999, 99999);
+
+
+    projection.map((object) => {
+      object.map((surface) => {
+        context.beginPath();
+        context.moveTo(surface[0].x, surface[0].y);
+        surface.slice(1).map((point) => {
+          context.lineTo(point.x, point.y);
+        });
+        context.closePath();
+        context.stroke(); 
+      });
+    }
+    );
   }
+}
+
+
+const crosProduct = (u, v) => {
+  return [
+    (u[1]*v[2]) - (u[2]*v[1]),
+    (u[2]*v[0]) - (u[0]*v[2]),
+    (u[0]*v[1]) - (u[1]*v[0])
+  ]
+};
+
+const vectorLength = v => {
+    return Math.sqrt(v.map(w => w*w).reduce((sum, w) => sum + w, 0));
 }
 
 class Camera {
@@ -319,6 +353,22 @@ class Camera {
     this.position = position;
     this.target = target;
     this.zoom = zoom;
+  }
+
+  get directionOfGaze() {
+    return [
+      this.target.x - this.position.x,
+      this.target.y - this.position.y,
+      this.target.z - this.position.z
+    ]
+  }
+
+  get handednessAxe() {
+    return crosProduct([0, 1, 0], this.directionOfGaze);
+  }
+
+  get upVector() {
+    return crosProduct(this.directionOfGaze, this.handednessAxe);
   }
 
   get perspective() {
@@ -332,7 +382,22 @@ class Camera {
   }
 
   get alignAxes() {
+    const v = this.handednessAxe;
+    const u = this.upVector;
+    const n = this.directionOfGaze;
+    
+    const vLength = vectorLength(v);
+    const uLength = vectorLength(u);
+    const nLength = vectorLength(n);
 
+
+    //prettier-ignore
+    return [
+      [v[0]/vLength, v[1] / vLength, v[2]/vLength, 0],
+      [u[0]/uLength, u[1] / uLength, u[2]/uLength, 0],
+      [n[0]/nLength, n[1] / nLength, n[2]/nLength, 0],
+      [0, 0, 0, 1]
+    ]
   }
 
   get translateCenter() {
@@ -347,88 +412,72 @@ class Camera {
   }
 
   get combinationMatrix() {
-    // TODO dodac alignAxes()
     return Matrixes.multipleMultiplication(
       this.perspective,
       Matrixes.leftToRightHanded(),
+      this.alignAxes,
       this.translateCenter
     )
   }
 }
 
 const projectScene = (camera, scene) => {
-  scene.objects.map((object) => {
-    object.surfaces.map((surface) => {
-      surface.points.map((point) => {
+   var forScene = scene.objects.map((object) => {
+    var forObject = object.surfaces.map((surface) => {
+      var forSurface = surface.points.map((point) => {
         var pointMatrix = point.asMatrix;
         var combined = camera.combinationMatrix;
         var multiplied = Matrixes.multiplication(combined, pointMatrix);
-
-        new Point3d(
-          multiplied[0][0],
-          multiplied[1][0],
-          0
-        )
+        var homo = Matrixes.homogeneus(multiplied);
+        return new Point3d(homo[0], homo[1], 0);
       });
+      return forSurface;
     });
+    return forObject;
   });
+  return forScene;
 }
 
 const MAIN = 'starthere';
 
-var cameraPosition = new Point3d(-100, 0, 0);
+var cameraPosition = new Point3d(-1000, 0, 0);
+var targetPoint = new Point3d(500, 0, 0);
 
-var camera = new Camera(cameraPosition, {}, 1);
-const block = new Block(new Point3d(0, 0, 500), new Point3d(500, 100, 800));
-const scene = new Scene(block);
+var camera = new Camera(cameraPosition, targetPoint, 50);
+const block1 = new Block(new Point3d(500, 0, 0), new Point3d(1000, 1000, 1000), defaultColor);
+const block2 = new Block(new Point3d(0, 0, 2500), new Point3d(1000, 1000, 3500), "#85144b");
+const scene = new Scene(block1, block2);
 
 scene.draw(projectScene(camera, scene));
+
+const transform = (key, movement) => {
+  var translated = translate(cameraPosition.asMatrix, movement);
+  var translatedTarget = translate(targetPoint.asMatrix, movement);
+  cameraPosition = new Point3d(translated[0][0], translated[1][0], translated[2][0]);
+  targetPoint = new Point3d(translatedTarget[0][0], translatedTarget[1][0], translatedTarget[2][0]);
+  camera = new Camera(cameraPosition, targetPoint, 100);
+  scene.draw(projectScene(camera, scene));
+  drwaHandledKey(key);
+}
 
 /**
  * Obsługuje wciśnięcie klawisza
  * @param {event.key} key - Wciśnięty klawisz 
  */
 const handleAction = key => {
-  darwHandledKey(key);
+
   switch (key) {
     case "w":
-      console.log("Before", cameraPosition);
-      var translated = translate(cameraPosition.asMatrix, MOVEMENT.up);
-      cameraPosition = new Point3d(translated[0][0], translated[1][0], translated[2][0]);
-      console.log("After:");
-      console.table(cameraPosition);
-      camera = new Camera(cameraPosition, {}, 1);
-      scene.draw(projectScene(camera, scene));
-
+      transform(key, MOVEMENT.closer);
       break;
     case "s":
-      console.log("Before", cameraPosition);
-      var translated = translate(cameraPosition.asMatrix, MOVEMENT.down);
-      cameraPosition = new Point3d(translated[0][0], translated[1][0], translated[2][0]);
-      console.log("After:");
-      console.table(cameraPosition);
-      camera = new Camera(cameraPosition, {}, 1);
-      scene.draw(projectScene(camera, scene));
+      transform(key, MOVEMENT.further);
       break;
-
     case "a":
-      console.log("Before", cameraPosition);
-      var translated = translate(cameraPosition.asMatrix, MOVEMENT.left);
-      cameraPosition = new Point3d(translated[0][0], translated[1][0], translated[2][0]);
-      console.log("After:");
-      console.table(cameraPosition);
-      camera = new Camera(cameraPosition, {}, 1);
-      scene.draw(projectScene(camera, scene));
+      transform(key, MOVEMENT.left);
       break;
-
     case "d":
-      console.log("Before", cameraPosition);
-      var translated = translate(cameraPosition.asMatrix, MOVEMENT.right);
-      cameraPosition = new Point3d(translated[0][0], translated[1][0], translated[2][0]);
-      console.log("After:");
-      console.table(cameraPosition);
-      camera = new Camera(cameraPosition, {}, 1);
-      scene.draw(projectScene(camera, scene));
+      transform(key, MOVEMENT.right);
       break;
   }
 };
