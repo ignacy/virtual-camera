@@ -43,7 +43,7 @@ const dotProduct = (xs, ys) => {
   if (ziped === undefined) {
     return 0;
   } else {
-    sum(ziped);
+    ziped.reduce((suma, x) => suma + x, 0)
   }
 };
 
