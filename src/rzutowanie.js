@@ -275,6 +275,23 @@ class Scene {
       });
     });
   }
+
+  project(camera) {
+    var forScene = this.objects.map(object => {
+      var forObject = object.vertices.map(surface => {
+        var forVertex = surface.points.map(point => {
+          var pointMatrix = point.asMatrix;
+          var combined = camera.combinationMatrix;
+          var multiplied = Matrixes.multiplication(combined, pointMatrix);
+          var homo = Matrixes.homogeneus(multiplied);
+          return new Point3d(homo[0], homo[1], 0);
+        });
+        return forVertex;
+      });
+      return [forObject, object.color];
+    });
+    return forScene;
+  }
 }
 
 const crosProduct = (u, v) => {
@@ -385,25 +402,6 @@ class Camera {
   }
 }
 
-const projectScene = (camera, scene) => {
-  var forScene = scene.objects.map(object => {
-    var forObject = object.vertices.map(surface => {
-      var forVertex = surface.points.map(point => {
-        var pointMatrix = point.asMatrix;
-        var combined = camera.combinationMatrix;
-        var multiplied = Matrixes.multiplication(combined, pointMatrix);
-        var homo = Matrixes.homogeneus(multiplied);
-        return new Point3d(homo[0], homo[1], 0);
-      });
-      return forVertex;
-    });
-    return [forObject, object.color];
-  });
-  return forScene;
-};
-
-// -- MAIN SECTION
-
 var camera = new Camera({
   position: new Point3d(-1000, 0, 0),
   target: new Point3d(500, 0, 0),
@@ -425,18 +423,18 @@ const block3 = new Block(
   new Point3d(1500, 1000, 8000),
   "#FFDC00"
 );
-const scene = new Scene([block1, block2, block3]);
 
-scene.draw(projectScene(camera, scene));
+const scene = new Scene([block1, block2, block3]);
+scene.draw(scene.project(camera));
 
 const moveCamera = (key, movement) => {
   camera = camera.move(movement);
-  scene.draw(projectScene(camera, scene));
+  scene.draw(scene.project(camera));
 };
 
 const changeZoom = (key, zoomIncrement) => {
   camera = camera.changeZoom(zoomIncrement);
-  scene.draw(projectScene(camera, scene));
+  scene.draw(scene.project(camera));
 };
 
 /**
