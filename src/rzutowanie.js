@@ -65,7 +65,7 @@ class Point3d {
 /**
  * Powierzchnia jest definiowana przez co najmniej 3 punkty
  */
-class Surface {
+class Vertex {
   constructor(...points) {
     this.points = points;
   }
@@ -88,7 +88,7 @@ class Surface {
  */
 class Block {
   /**
-   * Draws a block object as surfaces between two points in 3d
+   * Draws a block object as vertices between two points in 3d
    * @param {Point3d} p1 - first point
    * @param {Point3d} p2 - second point
    */
@@ -98,44 +98,44 @@ class Block {
     this.color = color;
   }
 
-  get surfaces() {
+  get vertices() {
     return [
-      new Surface(
+      new Vertex(
         this.p1,
         new Point3d(this.p1.x, this.p1.y, this.p2.z),
         new Point3d(this.p2.x, this.p1.y, this.p2.z),
         new Point3d(this.p2.x, this.p1.y, this.p1.z)
       ),
 
-      new Surface(
+      new Vertex(
         new Point3d(this.p1.x, this.p2.y, this.p1.z),
         new Point3d(this.p1.x, this.p2.y, this.p2.z),
         this.p2,
         new Point3d(this.p2.x, this.p2.y, this.p1.z)
       ),
 
-      new Surface(
+      new Vertex(
         this.p1,
         new Point3d(this.p2.x, this.p1.y, this.p1.z),
         new Point3d(this.p2.x, this.p2.y, this.p1.z),
         new Point3d(this.p1.x, this.p2.y, this.p1.z)
       ),
 
-      new Surface(
+      new Vertex(
         new Point3d(this.p1.x, this.p2.y, this.p1.z),
         new Point3d(this.p2.x, this.p2.y, this.p1.z),
         this.p2,
         new Point3d(this.p1.x, this.p2.y, this.p2.z)
       ),
 
-      new Surface(
+      new Vertex(
         this.p1,
         new Point3d(this.p1.x, this.p1.y, this.p2.z),
         new Point3d(this.p1.x, this.p2.y, this.p2.z),
         new Point3d(this.p1.x, this.p2.y, this.p1.z)
       ),
 
-      new Surface(
+      new Vertex(
         new Point3d(this.p2.x, this.p1.y, this.p1.z),
         new Point3d(this.p2.x, this.p1.y, this.p2.z),
         this.p2,
@@ -145,7 +145,7 @@ class Block {
   }
 
   get coordinatesMatrix() {
-    return this.surfaces.map(s => s.asMatrix);
+    return this.vertices.map(s => s.asMatrix);
   }
 }
 
@@ -387,15 +387,15 @@ class Camera {
 
 const projectScene = (camera, scene) => {
   var forScene = scene.objects.map(object => {
-    var forObject = object.surfaces.map(surface => {
-      var forSurface = surface.points.map(point => {
+    var forObject = object.vertices.map(surface => {
+      var forVertex = surface.points.map(point => {
         var pointMatrix = point.asMatrix;
         var combined = camera.combinationMatrix;
         var multiplied = Matrixes.multiplication(combined, pointMatrix);
         var homo = Matrixes.homogeneus(multiplied);
         return new Point3d(homo[0], homo[1], 0);
       });
-      return forSurface;
+      return forVertex;
     });
     return [forObject, object.color];
   });
