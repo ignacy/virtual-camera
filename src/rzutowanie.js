@@ -66,7 +66,7 @@ class Point3d {
  * Powierzchnia jest definiowana przez co najmniej 3 punkty
  */
 class Vertex {
-  constructor(...points) {
+  constructor(points) {
     this.points = points;
   }
 
@@ -100,47 +100,47 @@ class Block {
 
   get vertices() {
     return [
-      new Vertex(
+      new Vertex([
         this.p1,
         new Point3d(this.p1.x, this.p1.y, this.p2.z),
         new Point3d(this.p2.x, this.p1.y, this.p2.z),
         new Point3d(this.p2.x, this.p1.y, this.p1.z)
-      ),
+      ]),
 
-      new Vertex(
+      new Vertex([
         new Point3d(this.p1.x, this.p2.y, this.p1.z),
         new Point3d(this.p1.x, this.p2.y, this.p2.z),
         this.p2,
         new Point3d(this.p2.x, this.p2.y, this.p1.z)
-      ),
+      ]),
 
-      new Vertex(
+      new Vertex([
         this.p1,
         new Point3d(this.p2.x, this.p1.y, this.p1.z),
         new Point3d(this.p2.x, this.p2.y, this.p1.z),
         new Point3d(this.p1.x, this.p2.y, this.p1.z)
-      ),
+      ]),
 
-      new Vertex(
+      new Vertex([
         new Point3d(this.p1.x, this.p2.y, this.p1.z),
         new Point3d(this.p2.x, this.p2.y, this.p1.z),
         this.p2,
         new Point3d(this.p1.x, this.p2.y, this.p2.z)
-      ),
+      ]),
 
-      new Vertex(
+      new Vertex([
         this.p1,
         new Point3d(this.p1.x, this.p1.y, this.p2.z),
         new Point3d(this.p1.x, this.p2.y, this.p2.z),
         new Point3d(this.p1.x, this.p2.y, this.p1.z)
-      ),
+      ]),
 
-      new Vertex(
+      new Vertex([
         new Point3d(this.p2.x, this.p1.y, this.p1.z),
         new Point3d(this.p2.x, this.p1.y, this.p2.z),
         this.p2,
         new Point3d(this.p2.x, this.p2.y, this.p1.z)
-      )
+      ])
     ];
   }
 
@@ -210,7 +210,7 @@ class Matrixes {
     );
   }
 
-  static multipleMultiplication(...matrixes) {
+  static multipleMultiplication(matrixes) {
     return matrixes.reduce(
       (previous, matrix) => this.multiplication(previous, matrix),
       this.identityMatrix()
@@ -252,7 +252,7 @@ const translate = (cameraPosition, translationVector) => {
 };
 
 class Scene {
-  constructor(...objects) {
+  constructor(objects) {
     this.objects = objects;
   }
 
@@ -376,12 +376,12 @@ class Camera {
   }
 
   get combinationMatrix() {
-    return Matrixes.multipleMultiplication(
+    return Matrixes.multipleMultiplication([
       this.perspective,
       Matrixes.leftToRightHanded(),
       this.alignAxes,
       this.translateCenter
-    );
+    ]);
   }
 }
 
@@ -425,7 +425,7 @@ const block3 = new Block(
   new Point3d(1500, 1000, 8000),
   "#FFDC00"
 );
-const scene = new Scene(block1, block2, block3);
+const scene = new Scene([block1, block2, block3]);
 
 scene.draw(projectScene(camera, scene));
 
