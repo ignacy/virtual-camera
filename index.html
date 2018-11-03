@@ -1,13 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <title>Virtual camera</title></head>
-  <body>
-    <!-- <canvas id="canvas" width="600" height="600" style="border:1px solid #c3c3c3;"></canvas>-->
 
-    <canvas id="kanvas" width="800" height="800" style="border:1px solid #c3c3c3;"></canvas>
-    <!-- <script type="text/javascript" src="kamera.js"></script> -->
+<head>
+  <meta charset="UTF-8">
+  <title>Virtual camera</title>
+</head>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css" rel="stylesheet">
+
+<body class="font-source-sans font-normal text-black leading-normal">
+
+  <div class="-mx-6">
+    <div class="container mx-auto lg:w-3/5 px-8 mb-6">
+
+      <h3 class="text-grey-darkest font-sans text-lg text-xl md:text-2xl pb-4 pl-4"> Projekt kamery wirtualnej</h1>
+    </div>
+
+
+    <div class="container mx-auto lg:w-3/5 px-8">
+      <h4 class="text-blue-dark font-sans text-lg pl-3 pb-4">Obsługiwane klawisze:</h2>
+
+        <section class="rounded-lg lg:w-2/5 bg-grey-lighter">
+          <ul class="list font-sans text-lg text-grey-darkest">
+            <li><b>s</b> - odsuwa kamerę dalje</li>
+            <li><b>w</b>- przesuwa kamerę blizej</li>
+            <li><b>strzałka w lewo</b> - przesuwa kamerę w lewo</li>
+            <li><b>strzałka w prawo</b> - przesuwa kamerę w prawo</li>
+            <li><b>strzałka w dół</b> - przesuwa kamerę w dół</li>
+            <li><b>strzałka w góre</b> - przesuwa kamerę w góre</li>
+          </ul>
+        </section>
+    </div>
+
+    <br />
+
+    <div class="container mx-auto lg:w-3/5 px-6">
+      <canvas id="kanvas" class="shadow-md block border border-blue-dark p-2" width="600" height="600" tabindex="1"></canvas>
+    </div>
     <script type="text/javascript" src="src/rzutowanie.js"></script>
-  </body>
+  </div>
+</body>
+
 </html>

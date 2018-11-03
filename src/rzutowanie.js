@@ -301,13 +301,13 @@ const translate = (cameraPosition, translationVector) => {
  * @param {String} text - znak na wciśniętym klawiszu
  */
 const drawHandledKey = text => {
-  context.clearRect(750, 750, 50, 50);
+  context.clearRect(550, 550, 50, 50);
   context.fillStyle = "#DDDDDD";
-  context.fillRect(750, 750, 50, 50);
+  context.fillRect(550, 550, 50, 50);
 
   context.fillStyle = "#0074D9";
   context.font = "30px Arial";
-  context.fillText(text, 765, 785);
+  context.fillText(text, 565, 585);
   context.fillStyle = "#111111";
 };
 
@@ -354,10 +354,18 @@ const vectorLength = v => {
 }
 
 class Camera {
-  constructor(position, target, zoom) {
+  constructor({position, target, zoom}) {
     this.position = position;
     this.target = target;
     this.zoom = zoom;
+  }
+
+  move(movement) {
+    var translated = translate(this.position.asMatrix, movement);
+    var translatedTarget = translate(this.target.asMatrix, movement);
+    this.position = new Point3d(translated[0][0], translated[1][0], translated[2][0]);
+    this.target = new Point3d(translatedTarget[0][0], translatedTarget[1][0], translatedTarget[2][0]);
+    return this;
   }
 
   get directionOfGaze() {
@@ -443,12 +451,14 @@ const projectScene = (camera, scene) => {
   return forScene;
 }
 
-const MAIN = 'starthere';
+// -- MAIN SECTION
 
-var cameraPosition = new Point3d(-1000, 0, 0);
-var targetPoint = new Point3d(500, 0, 0);
+var camera = new Camera({
+  position: new Point3d(-1000, 0, 0),
+  target: new Point3d(500, 0, 0),
+  zoom: 50
+});
 
-var camera = new Camera(cameraPosition, targetPoint, 50);
 const block1 = new Block(new Point3d(500, 0, 0), new Point3d(1000, 1000, 1000), defaultColor);
 const block2 = new Block(new Point3d(0, 0, 2500), new Point3d(1000, 1000, 3500), "#85144b");
 const block3 = new Block(new Point3d(1000, 0, 7000), new Point3d(1500, 1000, 8000), "#FFDC00");
@@ -456,12 +466,8 @@ const scene = new Scene(block1, block2, block3);
 
 scene.draw(projectScene(camera, scene));
 
-const transform = (key, movement) => {
-  var translated = translate(cameraPosition.asMatrix, movement);
-  var translatedTarget = translate(targetPoint.asMatrix, movement);
-  cameraPosition = new Point3d(translated[0][0], translated[1][0], translated[2][0]);
-  targetPoint = new Point3d(translatedTarget[0][0], translatedTarget[1][0], translatedTarget[2][0]);
-  camera = new Camera(cameraPosition, targetPoint, 100);
+const moveCamera = (key, movement) => {
+  camera = camera.move(movement);
   scene.draw(projectScene(camera, scene));
   drawHandledKey(key);
 }
@@ -474,22 +480,22 @@ const handleAction = key => {
 
   switch (key) {
     case "w":
-      transform("w", MOVEMENT.closer);
+      moveCamera("w", MOVEMENT.closer);
       break;
     case "s":
-      transform("s", MOVEMENT.further);
+      moveCamera("s", MOVEMENT.further);
       break;
     case "ArrowDown":
-      transform("\\/", MOVEMENT.up);
+      moveCamera("\\/", MOVEMENT.up);
       break;
     case "ArrowUp":
-      transform("^", MOVEMENT.down);
+      moveCamera("^", MOVEMENT.down);
       break;
     case "ArrowLeft":
-      transform("->", MOVEMENT.left);
+      moveCamera("->", MOVEMENT.left);
       break;
     case "ArrowRight":
-      transform("<-", MOVEMENT.right);
+      moveCamera("<-", MOVEMENT.right);
       break;
   }
 };
