@@ -2,6 +2,7 @@
 
 const canvas = document.getElementById("kanvas");
 const context = canvas.getContext("2d");
+context.translate(canvas.width / 2, canvas.height / 2);
 const defaultColor = "#3D9970";
 const stepSize = 500;
 const zoomStepSize = 50;
@@ -83,6 +84,59 @@ class Vertex {
   }
 }
 
+class Cube {
+  constructor(p, length, color) {
+    this.p = p;
+    this.length = length;
+    this.color = color;
+  }
+
+  get vertices() {
+    var length = this.length;
+    return [
+      new Vertex([
+        this.p,
+        new Point3d(this.p.x + length, this.p.y, this.p.z),
+        new Point3d(this.p.x + length, this.p.y + length, this.p.z),
+        new Point3d(this.p.x, this.p.y + length, this.p.z)
+      ]),
+      new Vertex([
+        this.p,
+        new Point3d(this.p.x + length, this.p.y, this.p.z),
+        new Point3d(this.p.x + length, this.p.y, this.p.z + length),
+        new Point3d(this.p.x, this.p.y, this.p.z + length)
+      ]),
+      new Vertex([
+        this.p,
+        new Point3d(this.p.x, this.p.y, this.p.z + length),
+        new Point3d(this.p.x, this.p.y + length, this.p.z + length),
+        new Point3d(this.p.x, this.p.y + length, this.p.z)
+      ]),
+      new Vertex([
+        new Point3d(this.p.x, this.p.y + length, this.p.z),
+        new Point3d(this.p.x, this.p.y + length, this.p.z + length),
+        new Point3d(this.p.x + length, this.p.y + length, this.p.z + length),
+        new Point3d(this.p.x + length, this.p.y + length, this.p.z)
+      ]),
+      new Vertex([
+        new Point3d(this.p.x, this.p.y + length, this.p.z + length),
+        new Point3d(this.p.x, this.p.y, this.p.z + length),
+        new Point3d(this.p.x + length, this.p.y, this.p.z + length),
+        new Point3d(this.p.x + length, this.p.y + length, this.p.z + length)
+      ]),
+      new Vertex([
+        new Point3d(this.p.x + length, this.p.y + length, this.p.z + length),
+        new Point3d(this.p.x + length, this.p.y, this.p.z + length),
+        new Point3d(this.p.x + length, this.p.y, this.p.z),
+        new Point3d(this.p.x + length, this.p.y + length, this.p.z)
+      ])
+    ];
+  }
+
+  get coordinatesMatrix() {
+    return this.vertices.map(s => s.asMatrix);
+  }
+}
 /**
  * Reprezentuje blok - obiekt ktory rzutujemy
  */
@@ -247,8 +301,10 @@ class Scene {
       context.strokeStyle = objectAndColor[1];
 
       object.map(surface => {
+        var counter = 0;
         context.beginPath();
         context.moveTo(surface[0].x, surface[0].y);
+
         surface.slice(1).map(point => {
           context.lineTo(point.x, point.y);
         });
@@ -409,9 +465,9 @@ class Camera {
 }
 
 var camera = new Camera({
-  position: new Point3d(-1000, 0, 0),
-  target: new Point3d(500, 0, 0),
-  zoom: zoomStepSize
+  position: new Point3d(-2500, -1500, 4000),
+  target: new Point3d(-1000, -1500, 4000),
+  zoom: 150
 });
 
 const block1 = new Block(
@@ -424,13 +480,11 @@ const block2 = new Block(
   new Point3d(1000, 1000, 3500),
   "#85144b"
 );
-const block3 = new Block(
-  new Point3d(1000, 0, 7000),
-  new Point3d(1500, 1000, 8000),
-  "#FFDC00"
-);
 
-const scene = new Scene([block1, block2, block3]);
+const cube1 = new Cube(new Point3d(1000, 0, 7000), 1500, "#FFDC00");
+
+const cube2 = new Cube(new Point3d(0, -3000, 0), 2000, "red");
+const scene = new Scene([block1, block2, cube1, cube2]);
 scene.draw(scene.project(camera));
 
 const moveCamera = (key, movement) => {
