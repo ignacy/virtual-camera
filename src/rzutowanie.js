@@ -243,6 +243,15 @@ class Matrixes {
     ];
   }
 
+  static zRotation(kat) {
+    //prettier-ignore
+    return [
+      [Math.cos(kat), -Math.sin(kat), 0, 0],
+      [Math.sin(kat), Math.cos(kat), 0, 0],
+      [0, 0, 1, 0],
+      [0, 0, 0, 1]
+    ];
+  }
   static homogeneus(m) {
     var mflat = m.flat();
     var lst = mflat[mflat.length - 1];
@@ -373,10 +382,28 @@ class Camera {
     this.position = position;
     this.target = target;
     this.zoom = zoom;
+    this.directionOfGaze = [
+      this.target.x - this.position.x,
+      this.target.y - this.position.y,
+      this.target.z - this.position.z
+    ];
   }
 
   changeZoom(increment) {
     this.zoom = this.zoom + increment;
+    return this;
+  }
+
+  rotateZ(degreeRadians) {
+    var result = Matrixes.multiplication(
+      Matrixes.zRotation(degreeRadians),
+      new Point3d(
+        this.directionOfGaze[0],
+        this.directionOfGaze[1],
+        this.directionOfGaze[2]
+      ).asMatrix
+    );
+    this.directionOfGaze = result.slice(0, 3);
     return this;
   }
 
@@ -394,14 +421,6 @@ class Camera {
       translatedTarget[2][0]
     );
     return this;
-  }
-
-  get directionOfGaze() {
-    return [
-      this.target.x - this.position.x,
-      this.target.y - this.position.y,
-      this.target.z - this.position.z
-    ];
   }
 
   get handednessAxe() {
@@ -497,6 +516,13 @@ const changeZoom = (key, zoomIncrement) => {
   scene.draw(scene.project(camera));
 };
 
+const rotateCamera = (key, degreeRadians) => {
+  camera = camera.rotateZ(degreeRadians);
+  scene.draw(scene.project(camera));
+};
+
+const degreesToRadians = degrees => degrees * (Math.PI / 180);
+
 /**
  * Obsługuje wciśnięcie klawisza
  * @param {event.key} key - Wciśnięty klawisz
@@ -526,6 +552,12 @@ const handleAction = key => {
       break;
     case "e":
       changeZoom("e", -zoomStepSize);
+      break;
+    case "z":
+      rotateCamera("z", degreesToRadians(30));
+      break;
+    case "x":
+      rotateCamera("z", degreesToRadians(-30));
       break;
   }
 
