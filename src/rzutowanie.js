@@ -4,6 +4,7 @@ const canvas = document.getElementById("kanvas");
 const context = canvas.getContext("2d");
 const defaultColor = "#3D9970";
 const stepSize = 500;
+const zoomStepSize = 50;
 
 /**
  * Wypisuje informacje na temat stanu rzutowania i kamery
@@ -333,12 +334,16 @@ class Camera {
   }
 
   get perspective() {
+    var d = this.zoom;
+    if (d <= 0) {
+      d = zoomStepSize;
+    }
     //prettier-ignore
     return [
       [1, 0, 0, 0],
       [0, 1, 0, 0],
       [0, 0, 1, 0],
-      [0, 0, 1/this.zoom, 0]
+      [0, 0, 1/d, 0]
     ];
   }
 
@@ -402,7 +407,7 @@ const projectScene = (camera, scene) => {
 var camera = new Camera({
   position: new Point3d(-1000, 0, 0),
   target: new Point3d(500, 0, 0),
-  zoom: 50
+  zoom: zoomStepSize
 });
 
 const block1 = new Block(
@@ -459,10 +464,10 @@ const handleAction = key => {
       moveCamera("<-", MOVEMENT.right);
       break;
     case "q":
-      changeZoom("q", 50);
+      changeZoom("q", zoomStepSize);
       break;
     case "e":
-      changeZoom("e", -50);
+      changeZoom("e", -zoomStepSize);
       break;
   }
 
