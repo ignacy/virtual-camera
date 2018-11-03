@@ -494,6 +494,7 @@ const block1 = new Block(
   new Point3d(1000, 1000, 1000),
   defaultColor
 );
+
 const block2 = new Block(
   new Point3d(0, 0, 2500),
   new Point3d(1000, 1000, 3500),
