@@ -206,7 +206,7 @@ class Matrixes {
   static multiplication(matrixA, matrixB) {
     const columnsOfMatrixB = Matrixes.transpose(matrixB);
     return matrixA.map(rowOfMatrixA =>
-      columnsOfMatrixB.map(bColumn => dotProduct(rowOfMatrixA, bColumn))
+      columnsOfMatrixB.map(bColumn => Vector.dotProduct(rowOfMatrixA, bColumn))
     );
   }
 
@@ -217,24 +217,6 @@ class Matrixes {
     );
   }
 }
-
-/**
- * Tworzy z 2 wektorów 1 posługując się wynikiem funkcji f
- * @param {Function} f - funkcja
- * @param {vector} xs - iksy
- * @param {vector} ys - igreki
- */
-const zipWith = (f, xs, ys) =>
-  xs.length === ys.length ? xs.map((x, i) => f(x, ys[i])) : [0];
-
-/**
- * Oblicza produkt z kropką (2 wektory => 1 punkt)
- * @param {vector} xs - iksy
- * @param {vector} ys - igreki
- */
-const dotProduct = (xs, ys) => {
-  return zipWith((x, y) => x * y, xs, ys).reduce((suma, x) => suma + x, 0);
-};
 
 /**
  * Przesuwa kamere zgodnie z wektorem przesunięcia
@@ -294,17 +276,41 @@ class Scene {
   }
 }
 
-const crosProduct = (u, v) => {
-  return [
-    u[1] * v[2] - u[2] * v[1],
-    u[2] * v[0] - u[0] * v[2],
-    u[0] * v[1] - u[1] * v[0]
-  ];
-};
+class Vector {
+  static crosProduct(u, v) {
+    return [
+      u[1] * v[2] - u[2] * v[1],
+      u[2] * v[0] - u[0] * v[2],
+      u[0] * v[1] - u[1] * v[0]
+    ];
+  }
 
-const vectorLength = v => {
-  return Math.sqrt(v.map(w => w * w).reduce((sum, w) => sum + w, 0));
-};
+  /**
+   * Oblicza produkt z kropką (2 wektory => 1 punkt)
+   * @param {vector} xs - iksy
+   * @param {vector} ys - igreki
+   */
+  static dotProduct(xs, ys) {
+    return Vector.zipWith((x, y) => x * y, xs, ys).reduce(
+      (suma, x) => suma + x,
+      0
+    );
+  }
+
+  /**
+   * Tworzy z 2 wektorów 1 posługując się wynikiem funkcji f
+   * @param {Function} f - funkcja
+   * @param {vector} xs - iksy
+   * @param {vector} ys - igreki
+   */
+  static zipWith(f, xs, ys) {
+    return xs.length === ys.length ? xs.map((x, i) => f(x, ys[i])) : [0];
+  }
+
+  static length(v) {
+    return Math.sqrt(v.map(w => w * w).reduce((sum, w) => sum + w, 0));
+  }
+}
 
 class Camera {
   constructor({ position, target, zoom }) {
@@ -343,11 +349,11 @@ class Camera {
   }
 
   get handednessAxe() {
-    return crosProduct([0, 1, 0], this.directionOfGaze);
+    return Vector.crosProduct([0, 1, 0], this.directionOfGaze);
   }
 
   get upVector() {
-    return crosProduct(this.directionOfGaze, this.handednessAxe);
+    return Vector.crosProduct(this.directionOfGaze, this.handednessAxe);
   }
 
   get perspective() {
@@ -369,9 +375,9 @@ class Camera {
     const u = this.upVector;
     const n = this.directionOfGaze;
 
-    const vLength = vectorLength(v);
-    const uLength = vectorLength(u);
-    const nLength = vectorLength(n);
+    const vLength = Vector.length(v);
+    const uLength = Vector.length(u);
+    const nLength = Vector.length(n);
 
     //prettier-ignore
     return [
