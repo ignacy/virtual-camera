@@ -1,78 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-  <meta charset="UTF-8">
-  <title>Virtual camera</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css" rel="stylesheet">
-</head>
+  <head>
+    <meta charset="UTF-8">
+    <title>Virtual camera</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css" rel="stylesheet">
+  </head>
 
-<body class="font-source-sans font-normal text-black leading-normal">
+  <body class="font-source-sans font-normal text-black leading-normal">
 
-  <div class="-mx-6">
-    <div class="container mx-auto lg:w-3/5 px-8 mb-6">
-      <h3 class="text-grey-darkest font-sans text-lg text-xl md:text-2xl pb-4 pl-4"> Projekt kamery wirtualnej</h3>
+    <div class="-mx-6">
+      <div class="container mx-auto lg:w-3/5 px-8 mb-6">
+        <h3 class="text-grey-darkest font-sans text-lg text-xl md:text-2xl pb-4 pl-4"> Projekt kamery wirtualnej</h3>
+      </div>
+
+
+      <div class="container mx-auto lg:w-3/5 px-6">
+
+        <table class="text-2xl table table-auto lg:w-4/5 bg-grey-lighter mb-3">
+          <tr>
+            <th>Key</th>
+            <th>Zoom</th>
+            <th>VPR</th>
+            <th>Punkt rzutni</th>
+          </tr>
+          <tr>
+            <td class="text-center text-blue-dark text-extra-bold" id="key">-</td>
+            <td class="text-center text-teal-dark text-extra-bold" id="zoom">-</td>
+            <td class="text-center text-orange-dark text-extra-bold" id="position">-</td>
+            <td class="text-center text-red-dark text-extra-bold" id="target">-</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="container mx-auto lg:w-4/5 px-6">
+        <div class="flex bg-grey-lighter">
+
+          <section class="flex-3 px-4 py-2 m-2">
+        <canvas id="kanvas" class="shadow-md block border border-blue-dark p-2" width="600" height="600" tabindex="1"></canvas>
+
+          </section> 
+
+          <section class="flex-1 text-grey-darker bg-grey-lighter px-4 py-2 m-2">
+
+            <b>Przesuwanie kamery</b>
+            <table class="table table-auto bg-grey-lighter">
+              <tr>
+                <th>s</th>
+                <td>Odsuwa kamerę dalej</td>
+              </tr>
+              <tr>
+                <th>w</th>
+                <td>Przysuwa kamerę</td>
+              </tr>
+              <tr>
+                <th>lewo</th>
+                <td>przesuwa w lewo</td>
+              </tr>
+              <tr>
+                <th>prawo</th>
+                <td>przesuwa w prawo</td>
+              </tr>
+              <tr>
+                <th>dół</th>
+                <td>przesuwa w dół</td>
+              </tr>
+              <tr>
+                <th>góra</th>
+                <td>przesuwa w górę</td>
+              </tr>
+            </table>
+
+            <br/>
+            <b>Regulacja zoom:</b>
+            <table class="table table-auto bg-grey-lighter">
+              <tr>
+                <th>q</th>
+                <td>zwiększ zoom </td>
+              </tr>
+              <tr>
+                <th>e</th>
+                <td>zmniejsz zoom</td>
+              </tr>
+            </table>
+            <br/>
+            <b>obrót wokół osi Z, X, Y:</b>
+            <table class="table table-auto bg-grey-lighter">
+              <tr>
+                <th>z</th>
+                <td>(OZ) obróć o 30 stopni </td>
+              </tr>
+              <tr>
+                <th>x</th>
+                <td>(OZ) obróć o -30 stopni </td>
+              </tr>
+              <tr>
+                <th>c</th>
+                <td> (OX) obróć o 30 stopni </td>
+              </tr>
+              <tr>
+                <th>v</th>
+                <td> (OX) obróć o -30 stopni</td>
+              </tr>
+              <tr>
+                <th>b</th>
+                <td> (OY) obróć o 30 stopni </td>
+              </tr>
+              <tr>
+                <th>n</th>
+                <td> (OY) obróć o -30 stopni</td>
+              </tr>
+            </table>
+          </section>
+        </div>
+      </div>
+
+      <script type="text/javascript" src="src/rzutowanie.js"></script>
     </div>
-
-
-    <div class="container mx-auto lg:w-3/5 px-6">
-
-      <table class="text-2xl table table-auto lg:w-4/5 bg-grey-lighter mb-3">
-        <tr>
-          <th>Key</th>
-          <th>Zoom</th>
-          <th>VPR</th>
-          <th>Punkt rzutni</th>
-        </tr>
-        <tr>
-          <td class="text-center text-blue-dark text-extra-bold" id="key">-</td>
-          <td class="text-center text-teal-dark text-extra-bold" id="zoom">-</td>
-          <td class="text-center text-orange-dark text-extra-bold" id="position">-</td>
-          <td class="text-center text-red-dark text-extra-bold" id="target">-</td>
-        </tr>
-      </table>
-    </div>
-
-    <div class="container mx-auto lg:w-3/5 px-6">
-      <canvas id="kanvas" class="shadow-md block border border-blue-dark p-2" width="600" height="600" tabindex="1"></canvas>
-    </div>
-
-    <br />
-
-    <div class="container mx-auto lg:w-3/5 px-8">
-      <h4 class="text-gray-dark font-sans text-lg pl-3 pb-4">Obsługiwane klawisze</h4>
-
-      <section class="rounded-lg lg:w-2/5 bg-grey-lighter">
-        <b>Przesuwanie kamery</b>
-        <ul class="list font-sans text-lg text-grey-darkest">
-          <li><b>s</b> - odsuwa kamerę dalej</li>
-          <li><b>w</b>- przesuwa kamerę blizej</li>
-          <li><b>strzałka w lewo</b> - przesuwa kamerę w lewo</li>
-          <li><b>strzałka w prawo</b> - przesuwa kamerę w prawo</li>
-          <li><b>strzałka w dół</b> - przesuwa kamerę w dół</li>
-          <li><b>strzałka w góre</b> - przesuwa kamerę w góre</li>
-        </ul>
-
-        <b>Regulacja zoom:</b>
-        <ul class="list font-sans text-lg text-grey-darkest">
-          <li><b>q</b> zwiększ zoom </li>
-          <li><b>e</b> zmniejsz zoom</li>
-        </ul>
-
-        <b>obrót wokół osi Z, X, Y:</b>
-        <ul class="list font-sans text-lg text-grey-darkest">
-          <li><b>z</b> (OZ) obróć o 30 stopni </li>
-          <li><b>x</b> (OZ) obróć o -30 stopni</li>
-          <li><b>c</b> (OX) obróć o 30 stopni </li>
-          <li><b>v</b> (OX) obróć o -30 stopni</li>
-          <li><b>b</b> (OY) obróć o 30 stopni </li>
-          <li><b>n</b> (OY) obróć o -30 stopni</li>
-        </ul>
-      </section>
-    </div>
-
-    <script type="text/javascript" src="src/rzutowanie.js"></script>
-  </div>
-</body>
+  </body>
 
 </html>
