@@ -252,6 +252,27 @@ class Matrixes {
       [0, 0, 0, 1]
     ];
   }
+
+  static xRotation(kat) {
+    //prettier-ignore
+    return [
+      [1, 0, 0, 0],
+      [0, Math.cos(kat), -Math.sin(kat), 0],
+      [0, Math.sin(kat), Math.cos(kat), 0],
+      [0, 0, 0, 1]
+    ];
+  }
+
+  static yRotation(kat) {
+    //prettier-ignore
+    return [
+      [Math.cos(kat), 0, Math.sin(kat), 0],
+      [0, 1, 0, 0],
+      [-Math.sin(kat), 0, Math.cos(kat), 0],
+      [0, 0, 0, 1]
+    ];
+  }
+
   static homogeneus(m) {
     var mflat = m.flat();
     var lst = mflat[mflat.length - 1];
@@ -407,6 +428,32 @@ class Camera {
     return this;
   }
 
+  rotateX(degreeRadians) {
+    var result = Matrixes.multiplication(
+      Matrixes.xRotation(degreeRadians),
+      new Point3d(
+        this.directionOfGaze[0],
+        this.directionOfGaze[1],
+        this.directionOfGaze[2]
+      ).asMatrix
+    );
+    this.directionOfGaze = result.slice(0, 3);
+    return this;
+  }
+
+  rotateY(degreeRadians) {
+    var result = Matrixes.multiplication(
+      Matrixes.yRotation(degreeRadians),
+      new Point3d(
+        this.directionOfGaze[0],
+        this.directionOfGaze[1],
+        this.directionOfGaze[2]
+      ).asMatrix
+    );
+    this.directionOfGaze = result.slice(0, 3);
+    return this;
+  }
+
   move(movement) {
     var translated = translate(this.position.asMatrix, movement);
     var translatedTarget = translate(this.target.asMatrix, movement);
@@ -517,8 +564,18 @@ const changeZoom = (key, zoomIncrement) => {
   scene.draw(scene.project(camera));
 };
 
-const rotateCamera = (key, degreeRadians) => {
+const rotateCameraZ = (key, degreeRadians) => {
   camera = camera.rotateZ(degreeRadians);
+  scene.draw(scene.project(camera));
+};
+
+const rotateCameraX = (key, degreeRadians) => {
+  camera = camera.rotateX(degreeRadians);
+  scene.draw(scene.project(camera));
+};
+
+const rotateCameraY = (key, degreeRadians) => {
+  camera = camera.rotateY(degreeRadians);
   scene.draw(scene.project(camera));
 };
 
@@ -555,10 +612,22 @@ const handleAction = key => {
       changeZoom("e", -zoomStepSize);
       break;
     case "z":
-      rotateCamera("z", degreesToRadians(30));
+      rotateCameraZ("z", degreesToRadians(30));
       break;
     case "x":
-      rotateCamera("z", degreesToRadians(-30));
+      rotateCameraZ("x", degreesToRadians(-30));
+      break;
+    case "c":
+      rotateCameraX("c", degreesToRadians(30));
+      break;
+    case "v":
+      rotateCameraX("v", degreesToRadians(-30));
+      break;
+    case "b":
+      rotateCameraY("b", degreesToRadians(30));
+      break;
+    case "n":
+      rotateCameraY("n", degreesToRadians(-30));
       break;
   }
 

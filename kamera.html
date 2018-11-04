@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <title>Virtual camera</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css" rel="stylesheet">
 
 <body class="font-source-sans font-normal text-black leading-normal">
 
@@ -43,32 +43,30 @@
       <h4 class="text-gray-dark font-sans text-lg pl-3 pb-4">Obsługiwane klawisze</h4>
 
       <section class="rounded-lg lg:w-2/5 bg-grey-lighter">
-        <ul class="list list-reset font-sans text-lg text-grey-darkest">
+        <b>Przesuwanie kamery</b>
+        <ul class="list font-sans text-lg text-grey-darkest">
+          <li><b>s</b> - odsuwa kamerę dalej</li>
+          <li><b>w</b>- przesuwa kamerę blizej</li>
+          <li><b>strzałka w lewo</b> - przesuwa kamerę w lewo</li>
+          <li><b>strzałka w prawo</b> - przesuwa kamerę w prawo</li>
+          <li><b>strzałka w dół</b> - przesuwa kamerę w dół</li>
+          <li><b>strzałka w góre</b> - przesuwa kamerę w góre</li>
+        </ul>
 
-          <div class="border border-gray p-1">
-            <b>Przesuwanie kamery</b>
-            <li><b>s</b> - odsuwa kamerę dalej</li>
-            <li><b>w</b>- przesuwa kamerę blizej</li>
+        <b>Regulacja zoom:</b>
+        <ul class="list font-sans text-lg text-grey-darkest">
+          <li><b>q</b> zwiększ zoom </li>
+          <li><b>e</b> zmniejsz zoom</li>
+        </ul>
 
-            <li><b>strzałka w lewo</b> - przesuwa kamerę w lewo</li>
-            <li><b>strzałka w prawo</b> - przesuwa kamerę w prawo</li>
-            <li><b>strzałka w dół</b> - przesuwa kamerę w dół</li>
-            <li><b>strzałka w góre</b> - przesuwa kamerę w góre</li>
-          </div>
-
-          <div class="border border-gray p-1">
-            <b>Regulacja zoom:</b>
-            <li><b>q</b> zwiększ zoom </li>
-            <li><b>e</b> zmniejsz zoom</li>
-          </div>
-
-          <div class="border border-gray p-1">
-            <b>Obrót wokół osi Z:</b>
-            <li><b>z</b> Obróć o 30 stopni </li>
-            <li><b>x</b> Obróć o -30 stopni</li>
-          </div>
-
-
+        <b>obrót wokół osi Z, X, Y:</b>
+        <ul class="list font-sans text-lg text-grey-darkest">
+          <li><b>z</b> (OZ) obróć o 30 stopni </li>
+          <li><b>x</b> (OZ) obróć o -30 stopni</li>
+          <li><b>c</b> (OX) obróć o 30 stopni </li>
+          <li><b>v</b> (OX) obróć o -30 stopni</li>
+          <li><b>b</b> (OY) obróć o 30 stopni </li>
+          <li><b>n</b> (OY) obróć o -30 stopni</li>
         </ul>
       </section>
     </div>
