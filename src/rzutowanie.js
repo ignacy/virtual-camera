@@ -330,9 +330,6 @@ class Scene {
       object.map(surface => {
         var counter = 0;
         context.beginPath();
-
-        console.log("X, Y", surface[0].x, surface[0].y);
-
         context.moveTo(surface[0].x, surface[0].y);
 
         surface.slice(1).map(point => {
@@ -502,9 +499,6 @@ class Camera {
   move(movement) {
     var translated = translate(this.position.asMatrix, movement);
     var translatedTarget = translate(this.target.asMatrix, movement);
-    console.log("move", this.position, this.target, movement);
-    console.log("move", translated);
-    console.log("move", translatedTarget);
 
     this.position = new Point3d(translated[0], translated[1], translated[2]);
     this.target = new Point3d(
