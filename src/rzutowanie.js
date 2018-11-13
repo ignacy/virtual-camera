@@ -17,6 +17,7 @@ class Hud {
     this.keyHud = document.getElementById("key");
     this.vpr = document.getElementById("position");
     this.target = document.getElementById("target");
+    this.direction = document.getElementById("direction");
   }
 
   update(key, camera) {
@@ -24,6 +25,7 @@ class Hud {
     this.zoomHud.innerHTML = camera.zoom;
     this.vpr.innerHTML = camera.position.asVector;
     this.target.innerHTML = camera.target.asVector;
+    this.direction.innerHTML = camera.directionOfGaze();
   }
 }
 
@@ -33,10 +35,10 @@ const hud = new Hud();
  * Opisuje wektory przesunięcia
  */
 const MOVEMENT = {
-  closer: [stepSize, 0, 0],
-  further: [-stepSize, 0, 0],
-  left: [0, 0, -stepSize],
-  right: [0, 0, stepSize],
+  closer: [0, 0, -stepSize],
+  further: [0, 0, stepSize],
+  left: [stepSize, 0, 0],
+  right: [-stepSize, 0, 0],
   up: [0, stepSize, 0],
   down: [0, -stepSize, 0]
 };
@@ -46,9 +48,9 @@ const MOVEMENT = {
  */
 class Point3d {
   constructor(x, y, z) {
-    this.x = x;
-    this.y = y;
-    this.z = z;
+    this.x = Math.ceil(x);
+    this.y = Math.ceil(y);
+    this.z = Math.ceil(z);
   }
 
   get asVector() {
@@ -69,14 +71,6 @@ class Point3d {
 class Vertex {
   constructor(points) {
     this.points = points;
-  }
-
-  draw() {
-    context.beginPath();
-    context.moveTo(this.points[0].x, this.points[0].y);
-    this.points.slice(1).map(point => context.lineTo(point.x, point.y));
-    context.closePath();
-    context.stroke();
   }
 
   get asMatrix() {
@@ -276,6 +270,9 @@ class Matrixes {
   static homogeneus(m) {
     var mflat = m.flat();
     var lst = mflat[mflat.length - 1];
+    if (lst == 0) {
+      lst = 1;
+    }
     return mflat.map(x => x / lst);
   }
 
@@ -314,7 +311,7 @@ const translate = (cameraPosition, translationVector) => {
     macierzPrzesuniecia,
     cameraPosition
   );
-  return multiplied;
+  return multiplied.map(array => Math.ceil(array[0]));
 };
 
 class Scene {
@@ -333,6 +330,9 @@ class Scene {
       object.map(surface => {
         var counter = 0;
         context.beginPath();
+
+        console.log("X, Y", surface[0].x, surface[0].y);
+
         context.moveTo(surface[0].x, surface[0].y);
 
         surface.slice(1).map(point => {
@@ -403,11 +403,6 @@ class Camera {
     this.position = position;
     this.target = target;
     this.zoom = zoom;
-    this.directionOfGaze = [
-      this.target.x - this.position.x,
-      this.target.y - this.position.y,
-      this.target.z - this.position.z
-    ];
   }
 
   changeZoom(increment) {
@@ -415,16 +410,38 @@ class Camera {
     return this;
   }
 
+  directionOfGaze() {
+    return [
+      this.target.x - this.position.x,
+      this.target.y - this.position.y,
+      this.target.z - this.position.z
+    ];
+  }
+
   rotateZ(degreeRadians) {
     var result = Matrixes.multiplication(
       Matrixes.zRotation(degreeRadians),
       new Point3d(
-        this.directionOfGaze[0],
-        this.directionOfGaze[1],
-        this.directionOfGaze[2]
+        this.directionOfGaze()[0],
+        this.directionOfGaze()[1],
+        this.directionOfGaze()[2]
       ).asMatrix
     );
-    this.directionOfGaze = result.slice(0, 3);
+    //this.directionOfGaze = result.slice(0, 3);
+
+    var result2 = Matrixes.multiplication(
+      Matrixes.zRotation(degreeRadians),
+      this.position.asMatrix
+    );
+
+    var result3 = Matrixes.multiplication(
+      Matrixes.zRotation(degreeRadians),
+      this.target.asMatrix
+    );
+
+    this.position = new Point3d(result2[0][0], result2[1][0], result2[2][0]);
+    this.target = new Point3d(result3[0][0], result3[1][0], result3[2][0]);
+
     return this;
   }
 
@@ -432,12 +449,26 @@ class Camera {
     var result = Matrixes.multiplication(
       Matrixes.xRotation(degreeRadians),
       new Point3d(
-        this.directionOfGaze[0],
-        this.directionOfGaze[1],
-        this.directionOfGaze[2]
+        this.directionOfGaze()[0],
+        this.directionOfGaze()[1],
+        this.directionOfGaze()[2]
       ).asMatrix
     );
-    this.directionOfGaze = result.slice(0, 3);
+    //this.directionOfGaze = result.slice(0, 3);
+
+    var result2 = Matrixes.multiplication(
+      Matrixes.xRotation(degreeRadians),
+      this.position.asMatrix
+    );
+
+    var result3 = Matrixes.multiplication(
+      Matrixes.xRotation(degreeRadians),
+      this.target.asMatrix
+    );
+
+    this.position = new Point3d(result2[0][0], result2[1][0], result2[2][0]);
+    this.target = new Point3d(result3[0][0], result3[1][0], result3[2][0]);
+
     return this;
   }
 
@@ -445,37 +476,52 @@ class Camera {
     var result = Matrixes.multiplication(
       Matrixes.yRotation(degreeRadians),
       new Point3d(
-        this.directionOfGaze[0],
-        this.directionOfGaze[1],
-        this.directionOfGaze[2]
+        this.directionOfGaze()[0],
+        this.directionOfGaze()[1],
+        this.directionOfGaze()[2]
       ).asMatrix
     );
-    this.directionOfGaze = result.slice(0, 3);
+    //this.directionOfGaze = result.slice(0, 3);
+
+    var result2 = Matrixes.multiplication(
+      Matrixes.yRotation(degreeRadians),
+      this.position.asMatrix
+    );
+
+    var result3 = Matrixes.multiplication(
+      Matrixes.yRotation(degreeRadians),
+      this.target.asMatrix
+    );
+
+    this.position = new Point3d(result2[0][0], result2[1][0], result2[2][0]);
+    this.target = new Point3d(result3[0][0], result3[1][0], result3[2][0]);
+
     return this;
   }
 
   move(movement) {
     var translated = translate(this.position.asMatrix, movement);
     var translatedTarget = translate(this.target.asMatrix, movement);
-    this.position = new Point3d(
-      translated[0][0],
-      translated[1][0],
-      translated[2][0]
-    );
+    console.log("move", this.position, this.target, movement);
+    console.log("move", translated);
+    console.log("move", translatedTarget);
+
+    this.position = new Point3d(translated[0], translated[1], translated[2]);
     this.target = new Point3d(
-      translatedTarget[0][0],
-      translatedTarget[1][0],
-      translatedTarget[2][0]
+      translatedTarget[0],
+      translatedTarget[1],
+      translatedTarget[2]
     );
+
     return this;
   }
 
   get handednessAxe() {
-    return Vector.crosProduct([0, 1, 0], this.directionOfGaze);
+    return Vector.crosProduct([0, 1, 0], this.directionOfGaze());
   }
 
   get upVector() {
-    return Vector.crosProduct(this.directionOfGaze, this.handednessAxe);
+    return Vector.crosProduct(this.directionOfGaze(), this.handednessAxe);
   }
 
   get perspective() {
@@ -495,7 +541,7 @@ class Camera {
   get alignAxes() {
     const v = this.handednessAxe;
     const u = this.upVector;
-    const n = this.directionOfGaze;
+    const n = this.directionOfGaze();
 
     const vLength = Vector.length(v);
     const uLength = Vector.length(u);
@@ -531,9 +577,9 @@ class Camera {
 }
 
 var camera = new Camera({
-  position: new Point3d(-2500, -1500, 4000),
-  target: new Point3d(-1000, -1500, 4000),
-  zoom: 150
+  position: new Point3d(0, 0, -2000),
+  target: new Point3d(0, 0, 0),
+  zoom: 100
 });
 
 const block1 = new Block(
@@ -551,7 +597,7 @@ const block2 = new Block(
 const cube1 = new Cube(new Point3d(1000, 0, 7000), 1500, "#FFDC00");
 
 const cube2 = new Cube(new Point3d(0, -3000, 0), 2000, "red");
-const scene = new Scene([block1, block2, cube1, cube2]);
+const scene = new Scene([block1, block2]); //, cube1, cube2]);
 scene.draw(scene.project(camera));
 
 const moveCamera = (key, movement) => {
