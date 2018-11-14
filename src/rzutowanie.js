@@ -132,72 +132,6 @@ class Cube {
   }
 }
 /**
- * Reprezentuje blok - obiekt ktory rzutujemy
- */
-class Block {
-  /**
-   * Draws a block object as vertices between two points in 3d
-   * @param {Point3d} p1 - first point
-   * @param {Point3d} p2 - second point
-   */
-  constructor(p1, p2, color) {
-    this.p1 = p1;
-    this.p2 = p2;
-    this.color = color;
-  }
-
-  get vertices() {
-    return [
-      new Vertex([
-        this.p1,
-        new Point3d(this.p1.x, this.p1.y, this.p2.z),
-        new Point3d(this.p2.x, this.p1.y, this.p2.z),
-        new Point3d(this.p2.x, this.p1.y, this.p1.z)
-      ]),
-
-      new Vertex([
-        new Point3d(this.p1.x, this.p2.y, this.p1.z),
-        new Point3d(this.p1.x, this.p2.y, this.p2.z),
-        this.p2,
-        new Point3d(this.p2.x, this.p2.y, this.p1.z)
-      ]),
-
-      new Vertex([
-        this.p1,
-        new Point3d(this.p2.x, this.p1.y, this.p1.z),
-        new Point3d(this.p2.x, this.p2.y, this.p1.z),
-        new Point3d(this.p1.x, this.p2.y, this.p1.z)
-      ]),
-
-      new Vertex([
-        new Point3d(this.p1.x, this.p2.y, this.p1.z),
-        new Point3d(this.p2.x, this.p2.y, this.p1.z),
-        this.p2,
-        new Point3d(this.p1.x, this.p2.y, this.p2.z)
-      ]),
-
-      new Vertex([
-        this.p1,
-        new Point3d(this.p1.x, this.p1.y, this.p2.z),
-        new Point3d(this.p1.x, this.p2.y, this.p2.z),
-        new Point3d(this.p1.x, this.p2.y, this.p1.z)
-      ]),
-
-      new Vertex([
-        new Point3d(this.p2.x, this.p1.y, this.p1.z),
-        new Point3d(this.p2.x, this.p1.y, this.p2.z),
-        this.p2,
-        new Point3d(this.p2.x, this.p2.y, this.p1.z)
-      ])
-    ];
-  }
-
-  get coordinatesMatrix() {
-    return this.vertices.map(s => s.asMatrix);
-  }
-}
-
-/**
  * Operacje na macierzach
  */
 class Matrixes {
@@ -576,22 +510,10 @@ var camera = new Camera({
   zoom: 100
 });
 
-const block1 = new Block(
-  new Point3d(500, 0, 0),
-  new Point3d(1000, 1000, 1000),
-  defaultColor
-);
-
-const block2 = new Block(
-  new Point3d(0, 0, 2500),
-  new Point3d(1000, 1000, 3500),
-  "#85144b"
-);
-
+//  "#85144b"
 const cube1 = new Cube(new Point3d(1000, 0, 7000), 1500, "#FFDC00");
-
 const cube2 = new Cube(new Point3d(0, -3000, 0), 2000, "red");
-const scene = new Scene([block1, block2]); //, cube1, cube2]);
+const scene = new Scene([cube1, cube2]);
 scene.draw(scene.project(camera));
 
 const moveCamera = (key, movement) => {
