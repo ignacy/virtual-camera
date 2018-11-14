@@ -2,7 +2,6 @@
 
 const canvas = document.getElementById("kanvas");
 const context = canvas.getContext("2d");
-context.translate(canvas.width / 2, canvas.height / 2);
 const defaultColor = "#3D9970";
 const stepSize = 500;
 const zoomStepSize = 50;
@@ -51,6 +50,10 @@ class Point3d {
     this.x = Math.ceil(x);
     this.y = Math.ceil(y);
     this.z = Math.ceil(z);
+  }
+
+  inCanvas() {
+    return this.x <= 600 && this.x >= 0 && this.y >= 0 && this.y <= 600;
   }
 
   get asVector() {
@@ -234,21 +237,27 @@ class Scene {
       context.font = "14px Georgia";
 
       object.map(surface => {
-        context.beginPath();
-        context.moveTo(surface[0].x, surface[0].y);
-        context.fillText(
-          `${surface[0].x}, ${surface[0].y}`,
-          surface[0].x,
-          surface[0].y
-        );
+        if (surface[0].inCanvas() && surface[surface.length - 1].inCanvas()) {
+          context.beginPath();
+          context.moveTo(surface[0].x, surface[0].y);
 
-        surface.slice(1).map(point => {
-          context.fillText(`${point.x}, ${point.y}`, point.x, point.y);
-          context.lineTo(point.x, point.y);
-          console.log(point.x, point.y);
-        });
-        context.closePath();
-        context.stroke();
+          context.fillText(
+            `${surface[0].x}, ${surface[0].y}`,
+            surface[0].x,
+            surface[0].y
+          );
+
+          surface.slice(1).map(point => {
+            var x = point.x;
+            var y = point.y;
+
+            context.fillText(`${x}, ${y}`, x, y);
+            context.lineTo(x, y);
+            console.log(x, y);
+          });
+          context.closePath();
+          context.stroke();
+        }
       });
     });
   }
@@ -477,8 +486,8 @@ var camera = new Camera({
   zoom: 0
 });
 
-const cube1 = new Cube(new Point3d(1000, 0, 7000), 1500, "#FFDC00");
-const cube2 = new Cube(new Point3d(0, -3000, 0), 2000, "#85144b");
+const cube1 = new Cube(new Point3d(-3000, 3000, -500), 1500, "#FFDC00");
+const cube2 = new Cube(new Point3d(-7000, 3000, -1000), 500, "#85144b");
 const scene = new Scene([cube1, cube2]);
 
 scene.draw(scene.project(camera));
