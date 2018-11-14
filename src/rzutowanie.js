@@ -231,13 +231,21 @@ class Scene {
     projection.map(objectAndColor => {
       const object = objectAndColor[0];
       context.strokeStyle = objectAndColor[1];
+      context.font = "14px Georgia";
 
       object.map(surface => {
         context.beginPath();
         context.moveTo(surface[0].x, surface[0].y);
+        context.fillText(
+          `${surface[0].x}, ${surface[0].y}`,
+          surface[0].x,
+          surface[0].y
+        );
 
         surface.slice(1).map(point => {
+          context.fillText(`${point.x}, ${point.y}`, point.x, point.y);
           context.lineTo(point.x, point.y);
+          console.log(point.x, point.y);
         });
         context.closePath();
         context.stroke();
