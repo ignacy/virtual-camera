@@ -65,9 +65,6 @@ class Point3d {
   }
 }
 
-/**
- * Powierzchnia jest definiowana przez co najmniej 3 punkty
- */
 class Vertex {
   constructor(points) {
     this.points = points;
@@ -131,16 +128,8 @@ class Cube {
     return this.vertices.map(s => s.asMatrix);
   }
 }
-/**
- * Operacje na macierzach
- */
+
 class Matrixes {
-  /**
-   * @param {number} tx - x coordinate.
-   * @param {number} ty - y coordinate.
-   * @param {number} tz - z coordinate.
-   * @return {matrix} Macierz realizująca przesuniecie o wektor T
-   */
   static translationMatrix(tx, ty, tz) {
     // prettier-ignore
     return [
@@ -155,16 +144,6 @@ class Matrixes {
     //prettier-ignore
     return [
       [-1, 0, 0, 0],
-      [0, 1, 0, 0],
-      [0, 0, 1, 0],
-      [0, 0, 0, 1]
-    ];
-  }
-
-  static identityMatrix() {
-    //prettier-ignore
-    return [
-      [1, 0, 0, 0],
       [0, 1, 0, 0],
       [0, 0, 1, 0],
       [0, 0, 0, 1]
@@ -210,10 +189,6 @@ class Matrixes {
     return mflat.map(x => x / lst);
   }
 
-  /**
-   * Transponuje macierz [zamienia wiersze na kolumny i kolumny na wiersze]
-   * @param {matrix} matrix - macierz do transponowania
-   */
   static transpose(matrix) {
     return matrix[0].map((_, iCol) => matrix.map(row => row[iCol]));
   }
@@ -226,19 +201,15 @@ class Matrixes {
   }
 
   static multipleMultiplication(matrixes) {
-    return matrixes.reduce(
-      (previous, matrix) => this.multiplication(previous, matrix),
-      this.identityMatrix()
-    );
+    return matrixes
+      .slice(1)
+      .reduce(
+        (previous, matrix) => this.multiplication(previous, matrix),
+        matrixes[0]
+      );
   }
 }
 
-/**
- * Przesuwa kamere zgodnie z wektorem przesunięcia
- * @param {Point3d} cameraPosition - obecna pozycja kamery
- * @param {Array} translationVector - wektor opisujący przesunięcie
- * @returns {vector} - polozenie kamery po transformacji
- */
 const translate = (cameraPosition, translationVector) => {
   const macierzPrzesuniecia = Matrixes.translationMatrix(...translationVector);
   const multiplied = Matrixes.multiplication(
@@ -262,7 +233,6 @@ class Scene {
       context.strokeStyle = objectAndColor[1];
 
       object.map(surface => {
-        var counter = 0;
         context.beginPath();
         context.moveTo(surface[0].x, surface[0].y);
 
@@ -302,11 +272,6 @@ class Vector {
     ];
   }
 
-  /**
-   * Oblicza produkt z kropką (2 wektory => 1 punkt)
-   * @param {vector} xs - iksy
-   * @param {vector} ys - igreki
-   */
   static dotProduct(xs, ys) {
     return Vector.zipWith((x, y) => x * y, xs, ys).reduce(
       (suma, x) => suma + x,
@@ -314,12 +279,6 @@ class Vector {
     );
   }
 
-  /**
-   * Tworzy z 2 wektorów 1 posługując się wynikiem funkcji f
-   * @param {Function} f - funkcja
-   * @param {vector} xs - iksy
-   * @param {vector} ys - igreki
-   */
   static zipWith(f, xs, ys) {
     return xs.length === ys.length ? xs.map((x, i) => f(x, ys[i])) : [0];
   }
@@ -454,7 +413,7 @@ class Camera {
 
   get perspective() {
     var d = this.zoom;
-    if (d <= 0) {
+    if (d == 0) {
       d = zoomStepSize;
     }
     //prettier-ignore
@@ -507,46 +466,53 @@ class Camera {
 var camera = new Camera({
   position: new Point3d(0, 0, -2000),
   target: new Point3d(0, 0, 0),
-  zoom: 100
+  zoom: 0
 });
 
-//  "#85144b"
 const cube1 = new Cube(new Point3d(1000, 0, 7000), 1500, "#FFDC00");
-const cube2 = new Cube(new Point3d(0, -3000, 0), 2000, "red");
+const cube2 = new Cube(new Point3d(0, -3000, 0), 2000, "#85144b");
 const scene = new Scene([cube1, cube2]);
+
 scene.draw(scene.project(camera));
 
+const renderAndDraw = (transformation, scene) => {
+  transformation();
+  var projection = scene.project(camera);
+  scene.draw(projection);
+};
+
 const moveCamera = (key, movement) => {
-  camera = camera.move(movement);
-  scene.draw(scene.project(camera));
+  renderAndDraw(() => {
+    camera = camera.move(movement);
+  }, scene);
 };
 
 const changeZoom = (key, zoomIncrement) => {
-  camera = camera.changeZoom(zoomIncrement);
-  scene.draw(scene.project(camera));
+  renderAndDraw(() => {
+    camera = camera.changeZoom(zoomIncrement);
+  }, scene);
 };
 
 const rotateCameraZ = (key, degreeRadians) => {
-  camera = camera.rotateZ(degreeRadians);
-  scene.draw(scene.project(camera));
+  renderAndDraw(() => {
+    camera = camera.rotateZ(degreeRadians);
+  }, scene);
 };
 
 const rotateCameraX = (key, degreeRadians) => {
-  camera = camera.rotateX(degreeRadians);
-  scene.draw(scene.project(camera));
+  renderAndDraw(() => {
+    camera = camera.rotateX(degreeRadians);
+  }, scene);
 };
 
 const rotateCameraY = (key, degreeRadians) => {
-  camera = camera.rotateY(degreeRadians);
-  scene.draw(scene.project(camera));
+  renderAndDraw(() => {
+    camera = camera.rotateY(degreeRadians);
+  }, scene);
 };
 
 const degreesToRadians = degrees => degrees * (Math.PI / 180);
 
-/**
- * Obsługuje wciśnięcie klawisza
- * @param {event.key} key - Wciśnięty klawisz
- */
 const handleAction = key => {
   switch (key) {
     case "w":
