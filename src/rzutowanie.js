@@ -7,7 +7,6 @@ const stepSize = 500;
 const zoomStepSize = 50;
 
 /**
- * Wypisuje informacje na temat stanu rzutowania i kamery
  * Hud - heads up display
  */
 class Hud {
@@ -31,7 +30,7 @@ class Hud {
 const hud = new Hud();
 
 /**
- * Opisuje wektory przesunięcia
+ * Movement vectors
  */
 const MOVEMENT = {
   closer: [0, 0, -stepSize],
@@ -43,7 +42,7 @@ const MOVEMENT = {
 };
 
 /**
- * Opisuje punkt w 3 wymiarach
+ * Point in 3D
  */
 class Point3d {
   constructor(x, y, z) {
@@ -61,7 +60,7 @@ class Point3d {
   }
 
   /**
-   * Macierzowa reprezentacja (znormalizowana) punktu
+   * Normalized matrix representation
    */
   get asMatrix() {
     return [[this.x], [this.y], [this.z], [1]];
@@ -214,9 +213,9 @@ class Matrixes {
 }
 
 const translate = (cameraPosition, translationVector) => {
-  const macierzPrzesuniecia = Matrixes.translationMatrix(...translationVector);
+  const translationMatrix = Matrixes.translationMatrix(...translationVector);
   const multiplied = Matrixes.multiplication(
-    macierzPrzesuniecia,
+    translationMatrix,
     cameraPosition
   );
   return multiplied.map(array => Math.ceil(array[0]));
