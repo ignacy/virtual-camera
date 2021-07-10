@@ -324,85 +324,32 @@ class Camera {
     ];
   }
 
-  rotateZ(degreeRadians) {
-    var result = Matrixes.multiplication(
-      Matrixes.zRotation(degreeRadians),
+  rotate(rotationMatrix) {
+    const [[x], [y], [z]] = Matrixes.multiplication(
+      rotationMatrix,
       new Point3d(
         this.directionOfGaze()[0],
         this.directionOfGaze()[1],
         this.directionOfGaze()[2]
       ).asMatrix
     );
-    //this.directionOfGaze = result.slice(0, 3);
 
-    var result2 = Matrixes.multiplication(
-      Matrixes.zRotation(degreeRadians),
-      this.position.asMatrix
-    );
-
-    var result3 = Matrixes.multiplication(
-      Matrixes.zRotation(degreeRadians),
-      this.target.asMatrix
-    );
-
-    this.position = new Point3d(result2[0][0], result2[1][0], result2[2][0]);
-    this.target = new Point3d(result3[0][0], result3[1][0], result3[2][0]);
-
+    this.target = new Point3d(x + this.position.x, y + this.position.y, z + this.position.y);
+    console.log(this.position)
+    console.log(this.target)
     return this;
+  }
+
+  rotateZ(degreeRadians) {
+    return this.rotate(Matrixes.zRotation(degreeRadians));
   }
 
   rotateX(degreeRadians) {
-    var result = Matrixes.multiplication(
-      Matrixes.xRotation(degreeRadians),
-      new Point3d(
-        this.directionOfGaze()[0],
-        this.directionOfGaze()[1],
-        this.directionOfGaze()[2]
-      ).asMatrix
-    );
-    //this.directionOfGaze = result.slice(0, 3);
-
-    var result2 = Matrixes.multiplication(
-      Matrixes.xRotation(degreeRadians),
-      this.position.asMatrix
-    );
-
-    var result3 = Matrixes.multiplication(
-      Matrixes.xRotation(degreeRadians),
-      this.target.asMatrix
-    );
-
-    this.position = new Point3d(result2[0][0], result2[1][0], result2[2][0]);
-    this.target = new Point3d(result3[0][0], result3[1][0], result3[2][0]);
-
-    return this;
+    return this.rotate(Matrixes.xRotation(degreeRadians));
   }
 
   rotateY(degreeRadians) {
-    var result = Matrixes.multiplication(
-      Matrixes.yRotation(degreeRadians),
-      new Point3d(
-        this.directionOfGaze()[0],
-        this.directionOfGaze()[1],
-        this.directionOfGaze()[2]
-      ).asMatrix
-    );
-    //this.directionOfGaze = result.slice(0, 3);
-
-    var result2 = Matrixes.multiplication(
-      Matrixes.yRotation(degreeRadians),
-      this.position.asMatrix
-    );
-
-    var result3 = Matrixes.multiplication(
-      Matrixes.yRotation(degreeRadians),
-      this.target.asMatrix
-    );
-
-    this.position = new Point3d(result2[0][0], result2[1][0], result2[2][0]);
-    this.target = new Point3d(result3[0][0], result3[1][0], result3[2][0]);
-
-    return this;
+    return this.rotate(Matrixes.yRotation(degreeRadians));
   }
 
   move(movement) {
